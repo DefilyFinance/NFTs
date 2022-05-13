@@ -1286,7 +1286,7 @@ interface MyToken {
     function mint(address to, uint256 amount) external;
 }
 
-contract CitiGolfNFT is ERC721Enumerable, ReentrancyGuard, Ownable {
+contract LootDragon is ERC721Enumerable, ReentrancyGuard, Ownable {
     //insert stuff here
 
     using Strings for uint256;
@@ -1294,9 +1294,8 @@ contract CitiGolfNFT is ERC721Enumerable, ReentrancyGuard, Ownable {
     uint public minted = 0;
     uint public constant max_mintable = 10000;
     uint256 public LATEST_CLAIMED_ID;
-    uint256 public NEXT_STOP_ID = 0;
-    uint public chestLoot = 100000000000000000 wei; //0.1 BNB
-    uint public claimPrice = 20000000000000000 wei; //0.02 BNB
+    uint public chestLoot = 500000000000000000 wei; //0.5 BNB
+    uint public claimPrice = 100000000000000000 wei; //0.1 BNB
 
     address public LDRToken = address(0);
     mapping(uint256 => bool) public claimedTokens;
@@ -1305,9 +1304,7 @@ contract CitiGolfNFT is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     event Claim(uint256 indexed _id);
     
-    function flipState(uint256 _nextStop) external onlyOwner {
-        require(_nextStop >= NEXT_STOP_ID);
-        NEXT_STOP_ID = _nextStop;
+    function flipState() external onlyOwner {
         canClaim = !canClaim;
     }
 
@@ -1337,11 +1334,6 @@ contract CitiGolfNFT is ERC721Enumerable, ReentrancyGuard, Ownable {
             uint nextId = minted;
             minted += 1;
             _safeMint(_msgSender(), nextId); 
-            if(minted - 1 == NEXT_STOP_ID){
-                canClaim = false;
-                excess += claimPrice*(n-i-1);
-                break;
-            }
         }
         LATEST_CLAIMED_ID = minted - 1;
         payable(_msgSender()).transfer(excess); 
@@ -1359,7 +1351,7 @@ contract CitiGolfNFT is ERC721Enumerable, ReentrancyGuard, Ownable {
             : '';
     }
 
-    string base_uri = "https://api-nft.defily.io/lpdi/bsc/";
+    string base_uri = "https://defily.io/nft/dragon/";
 
     function set_base_uri(string memory new_base_uri) public onlyOwner{
         base_uri = new_base_uri;
@@ -1377,10 +1369,10 @@ contract CitiGolfNFT is ERC721Enumerable, ReentrancyGuard, Ownable {
     function burn(uint256 tokenId) public virtual {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721Burnable: caller is not owner nor approved");
         _burn(tokenId);
-        if (tokenId % 27==0){
+        if (tokenId % 50==0){
             payable(address(_msgSender())).transfer(chestLoot);
         } else{ 
-            MyToken(LDRToken).mint(_msgSender(), 100000000000000000); // 0.1
+            MyToken(LDRToken).mint(_msgSender(), 500000000000000000); // 0.5BNB
         }
     }
 
@@ -1395,7 +1387,7 @@ contract CitiGolfNFT is ERC721Enumerable, ReentrancyGuard, Ownable {
          return balance;
     }
     
-    constructor() ERC721("CitiGolf NFT", "CitiGolfNFT") Ownable() {}
+    constructor() ERC721("LootDragon", "LOOTDRAGON") Ownable() {}
 }
 
 /// [MIT License]
